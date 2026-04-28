@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Your Recipe - ChefAI')}"></head>
+<body class="bg-gray-100 text-gray-900 min-h-screen flex flex-col font-sans">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow w-full pb-16">
+
+    <div class="bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 pt-16 pb-32 px-6 shadow-inner relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-20 pointer-events-none">
+            <div class="absolute -top-24 -left-24 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl"></div>
+            <div class="absolute top-1/2 right-12 w-72 h-72 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+                <span th:if="${selectedCuisine != null && selectedCuisine != 'Any'}" th:text="${selectedCuisine + ' Style'}"
+                      class="inline-block px-4 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-semibold text-sm tracking-wider uppercase mb-6 border border-emerald-500/30">
+                    Cuisine Badge
+                </span>
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight" th:text="${recipe.recipeName}">Recipe Name</h1>
+            <p class="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed" th:text="${recipe.description}">Description</p>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 -mt-20 relative z-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center uppercase tracking-wide text-sm border-b pb-3">
+                        <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        Ingredients
+                    </h3>
+                    <ul class="space-y-4">
+                        <li th:each="ingredient : ${recipe.ingredients}" class="flex items-start">
+                            <div class="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3 mt-0.5">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            </div>
+                            <span class="text-gray-700 leading-relaxed font-medium" th:text="${ingredient}">Ingredient</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div th:if="${!recipe.ingredientAlternatives.isEmpty()}" class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl shadow-lg p-8 border border-emerald-100">
+                    <h4 class="font-bold text-emerald-900 mb-4 flex items-center uppercase tracking-wide text-sm border-b border-emerald-200 pb-3">
+                        <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                        Chef's Swaps
+                    </h4>
+                    <ul class="space-y-3">
+                        <li th:each="entry : ${recipe.ingredientAlternatives}" class="text-sm">
+                            <span class="block font-bold text-emerald-800" th:text="${entry.key}">Item</span>
+                            <span class="block text-emerald-700 mt-0.5" th:text="${entry.value}">Alternative</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8">
+                <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12 border border-gray-100">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-8 border-b pb-4">Step-by-Step Instructions</h3>
+                    <div class="space-y-10">
+                        <div th:each="step, iterStat : ${recipe.stepByStepInstructions}" class="flex relative">
+                            <div th:if="${!iterStat.last}" class="absolute top-12 left-6 w-0.5 h-full bg-gray-100 -ml-px z-0"></div>
+                            <div class="flex-shrink-0 mr-6 relative z-10">
+                                <div class="w-12 h-12 rounded-2xl bg-gray-900 text-white font-bold flex items-center justify-center text-xl shadow-md" th:text="${iterStat.count}"></div>
+                            </div>
+                            <div class="pt-2">
+                                <p class="text-gray-700 text-lg leading-relaxed" th:text="${step}">Step text</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-white rounded-3xl shadow-lg p-6 border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+
+                    <th:block th:if="${isSavedView}">
+                        <a href="/my-recipes" class="w-full sm:w-auto bg-gray-100 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                            Back to Recipes
+                        </a>
+                        <form th:action="@{/recipe/delete/{id}(id=${recipeId})}" method="post" class="w-full sm:w-auto">
+                            <button type="submit" onclick="return confirm('Delete this recipe?');"
+                                    class="w-full bg-red-50 text-red-600 px-6 py-3 rounded-xl font-semibold hover:bg-red-600 hover:text-white transition flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                Delete Recipe
+                            </button>
+                        </form>
+                    </th:block>
+
+                    <th:block th:unless="${isSavedView}">
+                        <form th:action="@{/generate}" method="post" class="w-full sm:w-auto flex-grow">
+                            <input type="hidden" name="ingredients" th:value="${originalIngredients}" />
+                            <input type="hidden" name="excludeRecipe" th:value="${recipe.recipeName}" />
+                            <input type="hidden" name="cuisine" th:value="${selectedCuisine}" />
+                            <button type="submit" class="w-full bg-gray-100 text-gray-700 px-6 py-4 rounded-xl font-semibold hover:bg-gray-200 transition flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                                Suggest a Different Recipe
+                            </button>
+                        </form>
+
+                        <form sec:authorize="isAuthenticated()" th:action="@{/recipe/save}" method="post" class="w-full sm:w-auto">
+                            <input type="hidden" name="recipeName" th:value="${recipe.recipeName}" />
+                            <input type="hidden" name="description" th:value="${recipe.description}" />
+                            <input type="hidden" name="cuisine" th:value="${selectedCuisine}" />
+
+                            <input type="hidden" th:each="ing : ${recipe.ingredients}" name="ingredients" th:value="${ing}" />
+                            <input type="hidden" th:each="step : ${recipe.stepByStepInstructions}" name="stepByStepInstructions" th:value="${step}" />
+                            <input type="hidden" th:each="entry : ${recipe.ingredientAlternatives}" name="alternatives" th:value="${entry.key + '|' + entry.value}" />
+
+                            <button type="submit" class="w-full bg-emerald-600 shadow-md shadow-emerald-500/30 text-white px-8 py-4 rounded-xl font-bold hover:bg-emerald-700 hover:shadow-lg transition flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                Save to Cookbook
+                            </button>
+                        </form>
+                    </th:block>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

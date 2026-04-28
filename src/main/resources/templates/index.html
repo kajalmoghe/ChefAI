@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Home - ChefAI')}"></head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow flex items-center justify-center p-6">
+
+    <div sec:authorize="isAnonymous()" class="text-center max-w-3xl mx-auto">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
+            Turn your <span class="text-emerald-600">leftovers</span> into a masterpiece.
+        </h1>
+        <p class="text-xl text-gray-600 mb-10">AI-powered recipe generation based strictly on the ingredients you already have in your kitchen.</p>
+        <a href="/register" class="bg-emerald-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-emerald-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">Get Started for Free</a>
+    </div>
+
+    <div sec:authorize="isAuthenticated()" class="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-gray-100 p-8 md:p-10">
+        <div class="mb-8 border-b border-gray-100 pb-6">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">What's in your fridge?</h2>
+            <p class="text-gray-500">List your ingredients below and let our AI chef handle the rest.</p>
+        </div>
+
+        <form th:action="@{/generate}" method="post" id="generateForm">
+
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">Your Ingredients</label>
+                <textarea name="ingredients" rows="4" required
+                          class="w-full rounded-2xl border-2 border-gray-200 shadow-inner focus:border-emerald-500 focus:ring-0 bg-gray-50 p-5 text-lg transition-all"
+                          placeholder="e.g. 2 chicken breasts, half an onion, heavy cream, garlic..."></textarea>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-4 relative">
+
+                <div class="relative w-full md:w-1/3">
+                    <input type="hidden" name="cuisine" id="cuisineInput" value="Any">
+
+                    <button type="button" id="cuisineDropdownBtn" class="w-full h-full min-h-[4rem] flex items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 hover:bg-white hover:border-emerald-400 focus:outline-none transition-all group shadow-sm">
+                        <div class="flex items-center">
+                            <div class="text-left">
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Cuisine (Optional)</span>
+                                <span id="selectedCuisineTitle" class="block font-bold text-gray-700 text-base group-hover:text-emerald-600 transition">Surprise Me</span>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-emerald-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </button>
+
+                    <div id="cuisineDropdownMenu" class="hidden absolute z-50 w-full md:w-[150%] bottom-full mb-3 left-0 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden transform opacity-0 transition-all duration-200 origin-bottom scale-95">
+
+                        <div class="cuisine-option cursor-pointer px-5 py-4 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 transition" data-value="Any" data-title="Surprise Me">
+                            <div>
+                                <span class="block font-bold text-gray-900">Surprise Me</span>
+                                <span class="block text-xs text-gray-500">AI selects the best fit</span>
+                            </div>
+                            <svg class="check-icon w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                        <div class="cuisine-option cursor-pointer px-5 py-4 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 transition" data-value="Indian" data-title="Indian">
+                            <div>
+                                <span class="block font-bold text-gray-900">Indian</span>
+                                <span class="block text-xs text-gray-500">Rich spices & deep flavors</span>
+                            </div>
+                            <svg class="check-icon w-5 h-5 text-emerald-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                        <div class="cuisine-option cursor-pointer px-5 py-4 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 transition" data-value="Italian" data-title="Italian">
+                            <div>
+                                <span class="block font-bold text-gray-900">Italian</span>
+                                <span class="block text-xs text-gray-500">Classic herbs & rich sauces</span>
+                            </div>
+                            <svg class="check-icon w-5 h-5 text-emerald-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                        <div class="cuisine-option cursor-pointer px-5 py-4 hover:bg-gray-50 flex items-center justify-between border-b border-gray-50 transition" data-value="Asian Fusion" data-title="Asian Fusion">
+                            <div>
+                                <span class="block font-bold text-gray-900">Asian Fusion</span>
+                                <span class="block text-xs text-gray-500">Savory, umami balance</span>
+                            </div>
+                            <svg class="check-icon w-5 h-5 text-emerald-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                        <div class="cuisine-option cursor-pointer px-5 py-4 hover:bg-gray-50 flex items-center justify-between transition" data-value="Mexican" data-title="Mexican">
+                            <div>
+                                <span class="block font-bold text-gray-900">Mexican</span>
+                                <span class="block text-xs text-gray-500">Bold & fresh ingredients</span>
+                            </div>
+                            <svg class="check-icon w-5 h-5 text-emerald-600 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full md:w-2/3 bg-gray-900 text-white py-5 px-8 rounded-2xl font-black text-xl tracking-wide hover:bg-gray-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 flex justify-center items-center shadow-lg shadow-gray-900/10 border-2 border-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300">
+                    <svg class="w-6 h-6 mr-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span id="btnText">Generate Recipe</span>
+                    <svg id="spinner" class="animate-spin ml-3 h-6 w-6 text-emerald-400 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </button>
+
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Dropdown Logic
+        const dropdownBtn = document.getElementById('cuisineDropdownBtn');
+        const dropdownMenu = document.getElementById('cuisineDropdownMenu');
+        const options = document.querySelectorAll('.cuisine-option');
+        const hiddenInput = document.getElementById('cuisineInput');
+        const selectedTitle = document.getElementById('selectedCuisineTitle');
+
+        // Toggle menu open/close
+        if(dropdownBtn && dropdownMenu) {
+            dropdownBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('hidden');
+                // Small delay to allow display block to apply before animating opacity
+                setTimeout(() => {
+                    dropdownMenu.classList.toggle('opacity-0');
+                    dropdownMenu.classList.toggle('scale-95');
+                }, 10);
+            });
+
+            // Handle option selection
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    // 1. Update the hidden input value for Spring Boot
+                    const value = this.getAttribute('data-value');
+                    hiddenInput.value = value;
+
+                    // 2. Update the text on the button
+                    selectedTitle.innerText = this.getAttribute('data-title');
+
+                    // 3. Move the checkmark icon to the selected option
+                    options.forEach(opt => opt.querySelector('.check-icon').classList.add('hidden'));
+                    this.querySelector('.check-icon').classList.remove('hidden');
+
+                    // 4. Close the menu
+                    dropdownMenu.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => dropdownMenu.classList.add('hidden'), 200);
+                });
+            });
+
+            // Close menu if clicking anywhere outside of it
+            document.addEventListener('click', function(e) {
+                if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => dropdownMenu.classList.add('hidden'), 200);
+                }
+            });
+        }
+
+        // Spinner Logic
+        document.getElementById('generateForm')?.addEventListener('submit', function() {
+            document.getElementById('btnText').innerText = 'Chef is cooking...';
+            document.getElementById('spinner').classList.remove('hidden');
+            document.getElementById('submitBtn').classList.add('opacity-90', 'cursor-not-allowed');
+        });
+    });
+</script>
+</body>
+</html>

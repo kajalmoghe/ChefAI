@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('My Recipes - ChefAI')}"></head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="flex-grow max-w-6xl mx-auto p-6 w-full">
+    <div class="mb-8 border-b border-gray-200 pb-4 flex justify-between items-end">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">My Cookbook</h1>
+            <p class="text-gray-500 mt-2">Recipes you have saved for later.</p>
+        </div>
+        <a href="/" class="bg-white border-2 border-emerald-600 text-emerald-600 px-4 py-2 rounded-lg font-semibold hover:bg-emerald-50 transition shadow-sm">
+            Generate New
+        </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(recipes)}" class="text-center bg-white rounded-2xl shadow-sm border border-gray-100 p-12">
+        <svg class="mx-auto h-12 w-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <h3 class="text-lg font-medium text-gray-900">No recipes saved yet</h3>
+        <p class="mt-1 text-gray-500">Get started by generating a recipe and clicking "Save to Cookbook".</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(recipes)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <div th:each="recipe : ${recipes}" class="relative bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-emerald-300 transition">
+
+            <a th:href="@{/recipe/{id}(id=${recipe.id})}" class="block pr-8">
+
+                <div th:if="${recipe.cuisine != null && recipe.cuisine != 'Any'}" class="mb-3">
+                        <span class="inline-block px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider"
+                              th:text="${recipe.cuisine}">
+                        </span>
+                </div>
+
+                <h2 class="text-xl font-bold text-gray-900 mb-2 hover:text-emerald-600 transition line-clamp-1" th:text="${recipe.recipeName}">Recipe Name</h2>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-3" th:text="${recipe.description}">Description goes here...</p>
+                <div class="text-xs text-emerald-600 font-medium">
+                    Saved on: <span th:text="${#temporals.format(recipe.savedAt, 'MMM dd, yyyy')}">Date</span>
+                </div>
+            </a>
+
+            <form th:action="@{/recipe/delete/{id}(id=${recipe.id})}" method="post" class="absolute top-6 right-6 m-0">
+                <button type="submit" onclick="return confirm('Are you sure you want to delete this recipe?');"
+                        class="text-gray-300 hover:text-red-500 transition focus:outline-none" title="Delete Recipe">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</main>
+</body>
+</html>
